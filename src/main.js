@@ -14,36 +14,70 @@ import {
   clearGallery,
   showLoader,
   hideLoader,
+  showLoadMoreBtn,
+  hideLoadMoreBtn,
+  scroolOn2Rows,
 } from './js/render-functions';
 
+const moreBtn = document.querySelector('.more-btn');
 const form = document.querySelector('.form');
 let images = [];
+let page = 1;
+let searchReq;
 
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
   clearGallery();
-  const searchReq = event.target.elements.searchText.value.trim();
+  hideLoadMoreBtn();
+  searchReq = event.target.elements.searchText.value.trim();
   if (!searchReq.length) {
     showPopUp('Enter key words to search for images');
     return;
   }
 
   showLoader();
-  getImagesByQuery(searchReq)
-    .then(data => {
-      images = data.hits;
+  try {
+    page = 1;
+    images = await getImagesByQuery(searchReq, page);
+    page++;
+    hideLoader();
+    createGallery(images);
+    showLoadMoreBtn();
+
+    if (!images.length) {
+      hideLoadMoreBtn();
       hideLoader();
-      createGallery(images);
-      if (!images.length) {
-        showPopUp(
-          'Sorry, there are no images matching your search query. Please try again!'
-        );
-        return;
-      }
-    })
-    .catch(error => {
-      showPopUp(error.message);
-    });
+      showPopUp(
+        'Sorry, there are no images matching your search query. Please try again!'
+      );
+      return;
+    }
+
+    if (images.length < 15) {
+      showPopUp("We're sorry, but you've reached the end of search results.");
+      hideLoadMoreBtn();
+    }
+  } catch (error) {
+    showPopUp(error.message);
+  }
+});
+
+moreBtn.addEventListener('click', async event => {
+  showLoader();
+  try {
+    images = await getImagesByQuery(searchReq, page);
+    page++;
+    hideLoader();
+    createGallery(images);
+    scroolOn2Rows(page);
+
+    if (images.length < 15) {
+      showPopUp("We're sorry, but you've reached the end of search results.");
+      hideLoadMoreBtn();
+    }
+  } catch (error) {
+    showPopUp(error.message);
+  }
 });
 
 function showPopUp(msg) {

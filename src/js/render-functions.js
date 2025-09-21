@@ -3,6 +3,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const galleryContainer = document.querySelector('.gallery');
 const loader = document.querySelector('.loader-container');
+const moreBtn = document.querySelector('.more-btn');
 
 const gallery = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -59,7 +60,10 @@ export function createGallery(images) {
 </li>`);
   }
 
-  galleryContainer.innerHTML = imgListItemCollection.join('\n');
+  galleryContainer.insertAdjacentHTML(
+    'beforeend',
+    imgListItemCollection.join('\n')
+  );
   gallery.refresh();
 }
 
@@ -85,4 +89,19 @@ export function showLoader() {
 Нічого не повертає. */
 export function hideLoader() {
   loader.classList.add('is-hidden');
+}
+
+export function showLoadMoreBtn() {
+  moreBtn.classList.remove('is-hidden');
+}
+
+export function hideLoadMoreBtn() {
+  moreBtn.classList.add('is-hidden');
+}
+
+export function scroolOn2Rows(page) {
+  window.scrollBy({
+    top: galleryContainer.firstChild.getBoundingClientRect().height * 2,
+    behavior: 'smooth',
+  });
 }
