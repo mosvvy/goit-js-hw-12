@@ -19,8 +19,11 @@ import {
   scroolOn2Rows,
 } from './js/render-functions';
 
+const PER_PAGE = 15;
+
 const moreBtn = document.querySelector('.more-btn');
 const form = document.querySelector('.form');
+let response;
 let images = [];
 let page = 1;
 let searchReq;
@@ -38,20 +41,20 @@ form.addEventListener('submit', async event => {
   showLoader();
   try {
     page = 1;
-    images = await getImagesByQuery(searchReq, page);
-    page++;
+    response = await getImagesByQuery(searchReq, PER_PAGE, page);
     hideLoader();
-    createGallery(images);
-    showLoadMoreBtn();
+    images = response.hits;
 
     if (!images.length) {
-      hideLoadMoreBtn();
-      hideLoader();
       showPopUp(
         'Sorry, there are no images matching your search query. Please try again!'
       );
       return;
     }
+
+    page++;
+    createGallery(images);
+    showLoadMoreBtn();
 
     if (images.length < 15) {
       showPopUp("We're sorry, but you've reached the end of search results.");
@@ -65,17 +68,28 @@ form.addEventListener('submit', async event => {
 moreBtn.addEventListener('click', async event => {
   showLoader();
   try {
-    images = await getImagesByQuery(searchReq, page);
-    page++;
+    response = await getImagesByQuery(searchReq, PER_PAGE, page);
     hideLoader();
+    images = response.hits;
+
+    page++;
     createGallery(images);
-    scroolOn2Rows(page);
+    scroolOn2Rows();
+
+    if (!images.length) {
+      hideLoadMoreBtn();
+      showPopUp(
+        'Sorry, there are no images matching your search query. Please try again!'
+      );
+      return;
+    }
 
     if (images.length < 15) {
       showPopUp("We're sorry, but you've reached the end of search results.");
       hideLoadMoreBtn();
     }
   } catch (error) {
+    hideLoader();
     showPopUp(error.message);
   }
 });

@@ -99,7 +99,7 @@ export function hideLoadMoreBtn() {
   moreBtn.classList.add('is-hidden');
 }
 
-export function scroolOn2Rows(page) {
+export function scroolOn2Rows() {
   window.scrollBy({
     top: galleryContainer.firstChild.getBoundingClientRect().height * 2,
     behavior: 'smooth',
