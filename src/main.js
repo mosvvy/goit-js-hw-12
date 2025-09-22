@@ -26,6 +26,7 @@ const form = document.querySelector('.form');
 let response;
 let images = [];
 let page = 1;
+let total;
 let searchReq;
 
 form.addEventListener('submit', async event => {
@@ -42,8 +43,8 @@ form.addEventListener('submit', async event => {
   try {
     page = 1;
     response = await getImagesByQuery(searchReq, PER_PAGE, page);
-    hideLoader();
     images = response.hits;
+    total = response.totalHits;
 
     if (!images.length) {
       showPopUp(
@@ -54,7 +55,10 @@ form.addEventListener('submit', async event => {
 
     page++;
     createGallery(images);
-    showLoadMoreBtn();
+
+    if (page * PER_PAGE < total) {
+      showLoadMoreBtn();
+    }
 
     if (images.length < 15) {
       showPopUp("We're sorry, but you've reached the end of search results.");
@@ -62,6 +66,8 @@ form.addEventListener('submit', async event => {
     }
   } catch (error) {
     showPopUp(error.message);
+  } finally {
+    hideLoader();
   }
 });
 
@@ -69,12 +75,10 @@ moreBtn.addEventListener('click', async event => {
   showLoader();
   try {
     response = await getImagesByQuery(searchReq, PER_PAGE, page);
-    hideLoader();
     images = response.hits;
 
-    page++;
     createGallery(images);
-    scroolOn2Rows();
+    // scroolOn2Rows();
 
     if (!images.length) {
       hideLoadMoreBtn();
@@ -84,13 +88,19 @@ moreBtn.addEventListener('click', async event => {
       return;
     }
 
-    if (images.length < 15) {
-      showPopUp("We're sorry, but you've reached the end of search results.");
+    if (page * PER_PAGE >= total) {
       hideLoadMoreBtn();
     }
+
+    page++;
+
+    if (images.length < 15) {
+      showPopUp("We're sorry, but you've reached the end of search results.");
+    }
   } catch (error) {
-    hideLoader();
     showPopUp(error.message);
+  } finally {
+    hideLoader();
   }
 });
 
