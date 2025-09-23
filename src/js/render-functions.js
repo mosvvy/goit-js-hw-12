@@ -65,10 +65,6 @@ export function createGallery(images) {
     imgListItemCollection.join('\n')
   );
   gallery.refresh();
-
-  if (galleryContainer.childElementCount > 15) {
-    scroolOn2Rows();
-  }
 }
 
 /*
